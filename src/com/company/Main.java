@@ -1,103 +1,130 @@
 package com.company;
-import java.io.BufferedReader;
-import java.io.File;
 
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.Scanner;
 
 public class Main {
-    public static class JavaFileHandlingExample
-    {
-        public static void main(String args[]) {
-            System.out.println("Please select one of the below operations");
-            System.out.println(" w for write mode ");
-            System.out.println(" r for read mode ");
-            System.out.println(" a for append mode ");
-            Scanner in =new Scanner(System.in);
-            String s=in.nextLine();
-            while (!s.equalsIgnoreCase("q")) {
-                if (s.equalsIgnoreCase("r")) {
-                    Scanner inputs=new Scanner(System.in);
-                    System.out.println("Please choose your next operation after reading the file: ");
-                    s = inputs.nextLine();
-                    new FReading();
-                } else if (s.equalsIgnoreCase("w") || s.equalsIgnoreCase("a")) {
-                    Scanner inputs=new Scanner(System.in);
-                    System.out.println("Please choose your next operation after writing/appending in the file: ");
-                    s = inputs.nextLine();
-                    writingToFile(s);
-                } else {
-                    Scanner inputs=new Scanner(System.in);
-                    System.out.println("Please choose from \"q\", \"r\", \"w\", \"a\": ");
-                    s = inputs.nextLine();
+    public static class JavaFileHandlingExample {
+        public static void main(String[] args) throws IOException {
+
+            textForMainContext();
+            Scanner in = new Scanner(System.in);
+            String s = in.nextLine();
+
+            while (!s.equalsIgnoreCase("quit")) {
+                switch (s) {
+                    case "files" -> {
+                        System.out.println("You chose to see the current file names in ascending order: ");
+                        filesInAscendingOrder("./Users");
+                        textForMainContext();
+                        s = in.nextLine();
+                    }
+                    case "user" -> {
+                        textForUserUtilities();
+                        s = in.nextLine();
+                        while (!s.equalsIgnoreCase("back")) {
+                            switch (s) {
+                                case "add" -> {
+                                    findWhichUser("add", in);
+                                    textForUserUtilities();
+                                }
+                                case "delete" -> {
+                                    findWhichUser("delete", in);
+                                    textForUserUtilities();
+                                }
+                                case "search" -> {
+                                    findWhichUser("search", in);
+                                    textForUserUtilities();
+                                }
+                                case "back" -> {
+                                }
+                                default -> System.out.println("Please choose from \"add\", \"delete\", \"search\", \"back\": ");
+                            }
+                            s = in.nextLine();
+                        }
+                        textForMainContext();
+                        s = in.nextLine();
+                    }
+                    case "quit" -> System.out.println("You chose to quit the program");
+                    default -> {
+                        System.out.println("Please choose from \"files\", \"user\", \"quit\": ");
+                        s = in.nextLine();
+                    }
                 }
             }
         }
 
-        public static void writingToFile(String s)
-        {
-            Scanner in=null;
-            try
-            {
-                String source = "";
-                File f=new File("file1.txt");
+        public static void findWhichUser(String s, Scanner in) throws IOException {
 
-                BufferedReader bf=new BufferedReader(new InputStreamReader(System.in));FileWriter f0 =null;
-                if(s.equalsIgnoreCase("w"))
-                {
-                    f0 = new FileWriter(f,false);
-                    System.out.println("CAUTION >> Please understand it will overwrite the content of the file ");
-                    System.out.println("Type 'no' to exit");
-                    System.out.println("Do you want to proceed :type 'yes' ");
-                    in=new Scanner(System.in);
-                    String s1=in.nextLine();
-                    if(s1.equals("no"))
-                        System.exit(0);
-                    System.out.println("Write 'stop' when you finish writing file ");
-                    f.delete();
-                    f.createNewFile();
-                    while(!(source=bf.readLine()).equalsIgnoreCase("stop") && !source.equalsIgnoreCase("q")){
-                        f0.write(source + System.getProperty("line.separator"));
-                    }
-                }
-                else
-                {  f0 = new FileWriter(f,true);
-                    System.out.println("Write 'stop' when you finish appending file ");
-                    while(!(source=bf.readLine()).equalsIgnoreCase("stop")){
-                        f0.append(source).append(System.getProperty("line.separator"));
-                    }
-                }
-                f0.close();
+            System.out.println("Please choose from which user do you want to " + s + " a file: ");
+            Path p = Paths.get("./Users");
+            List<Path> listOfPaths = new ArrayList<>();
+            List<String> stringList = new ArrayList<>();
+            Files.list(p).forEach(listOfPaths::add);
+            for (Path listOfPath : listOfPaths) {
+                stringList.add(listOfPath.getName(2).toString());
             }
-            catch(Exception e){
-                System.out.println("Error : " );
-                e.printStackTrace();
+            String inputTheUser = in.nextLine();
+            while(!stringList.contains(inputTheUser)){
+                System.out.println("Please choose between: ");
+                System.out.println(stringList);
+                inputTheUser = in.nextLine();
+            }
+            System.out.println("Which file do you want to " + s + ": ");
+            if (Objects.equals(s, "add")) {
+                addFile(inputTheUser, in);
             }
         }
-    }
-    static class FReading {
-        public static String str="";
 
-        public FReading() {
+        public static void addFile(String user, Scanner in) throws IOException {
+            String fileName = in.nextLine();
+            Path p1 = Paths.get("./Users/" + user + "/" + fileName);
 
-            try{
-                File f5=new File("file1.txt");
-                if(! f5.exists())
-                    f5.createNewFile();
-                FileReader fl=new FileReader(f5);
-                BufferedReader bf=new BufferedReader(fl);
-                //For reading till end
-                while((str=bf.readLine())!=null){
-                    System.out.println(str);
-                }
-                fl.close();
-            }catch(Exception e){
-                System.out.println("Error : " );
-                e.printStackTrace();
+            if(!Files.exists(p1)) {
+                Files.createFile(p1);
+            }else System.out.println("The file already exists");
+
+        }
+
+        public static void textForUserUtilities() {
+            System.out.println("Please select one of the below operations: ");
+            System.out.println("1) \"add\" to add a user specified file to the application");
+            System.out.println("2) \"delete\" to delete a user specified file from the application");
+            System.out.println("3) \"search\" to search a user specified file from the application ");
+            System.out.println("4) \"back\" to navigate back to the main context");
+        }
+
+        public static void textForMainContext() {
+            System.out.println("Please select one of the below operations: ");
+            System.out.println("1) \"files\" to return the current file names in ascending order");
+            System.out.println("2) \"user\" for the details of the user interface");
+            System.out.println("3) \"quit\" to close the application");
+        }
+
+        public static void deleteFile() {
+
+        }
+
+        public static void searchFile(String fileName, String user) throws IOException {
+            Path p = Paths.get("./Users/" + user);
+            Files.find(
+                    p,
+                    Integer.MAX_VALUE,
+                    (path, fa) -> path.getFileName().toString().endsWith(fileName)
+            ).forEach((System.out::println));
+        }
+
+        public static void filesInAscendingOrder(String s) {
+            Path p1 = Paths.get(s);
+            System.out.println(p1.getNameCount());
+            for (int i = 0; i < p1.getNameCount(); i++) {
+                System.out.println(i + " " + p1.getName(i));
             }
         }
     }
