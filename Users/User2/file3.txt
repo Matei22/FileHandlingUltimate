@@ -1,2 +1,0 @@
-This is the file3.txt inside the User2.
-Proceed further:
